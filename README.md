@@ -110,50 +110,52 @@ Redis, MinIO, Kafka, Qdrant, MongoDB, NiFi, Node-RED, Redash.
 
 ```
 cloud-infrastructure-project/
-├── README.md                           # ← вы здесь (главный хаб)
-├── .gitignore                          # исключения (secrets, dumps, logs)
+├── README.md                                # ← вы здесь (главный хаб)
+├── .gitignore                               # исключения (secrets, dumps, logs)
 │
-├── bi-analytics-stack/                 # Кейс 1: BI + DWH
-│   ├── README.md                       # краткий README (запуск, структура)
-│   ├── backups/                        # схемы БД + sample данные
-│   ├── configs/                        # docker-compose.yml + .env.example
-│   ├── dbt/                            # dbt-модели (staging)
-│   ├── airflow/dags/                   # DAG etl_to_clickhouse.py
-│   ├── database/                       # SQL-схемы (7 файлов)
-│   └── scripts/                        # 12 SQL-загрузчиков
+├── bi-analytics-stack/                      # Кейс 1: BI + DWH
+│   ├── README.md                            # описание BI-кейса
+│   ├── backups/                             # схемы БД + sample данные
+│   ├── configs/                             # docker-compose.yml + .env.example
+│   ├── dbt/                                 # dbt-модели (staging)
+│   ├── airflow/dags/                        # DAG etl_to_clickhouse.py
+│   ├── database/                            # SQL-схемы (7 файлов) + backups
+│   └── scripts/                             # 12 SQL-загрузчиков
 │
-├── k8s-monitoring-cluster/             # Кейс 2: K8s + мониторинг
-│   ├── README.md                       # краткий README
-│   ├── manifests/                      # kubectl get -o yaml (8 файлов)
-│   ├── values/                         # Helm values
-│   ├── configs/                        # README_k8s-master + скрипты
-│   ├── worker-1/                       # kubelet.log, containerd.log, system_info
-│   └── worker-2/                       # kubelet.log, system_info
+├── k8s-monitoring-cluster/                  # Кейс 2: K8s + мониторинг
+│   ├── README.md                            # описание K8s-кейса
+│   ├── K8s-master/                          # index-манифесты (airflow, minio)
+│   ├── configs/                             # скрипты (collect, get-docker, get-helm)
+│   ├── manifests/                           # kubectl get -o yaml (nodes, namespaces, svc, storage, helm)
+│   ├── values/                              # Helm values (monitoring)
+│   ├── worker-1/                            # kubelet.log, containerd.log, system_info
+│   └── worker-2/                            # kubelet.log, system_info
 │
-├── docs/                               # Расширенная документация
-│   ├── architecture-bi.md              # DWH-архитектура BI (схемы, слои)
-│   ├── bi-analytics-stack-flagship.md  # флагманское описание BI-кейса
-│   ├── bi-devops-main-tech.md          # техничка ВМ devops-main (порты, сервисы)
-│   ├── k8s-master-tech.md              # техничка k8s-master
-│   ├── k8s-cluster-setup.md            # пошаговая установка K8s-кластера
-│   ├── retail-data-generation.md       # генерация тестового retail-датасета
-│   ├── k8s-commands.md                 # шпаргалка команд K8s
-│   ├── git-guide.md                    # работа с Git в проекте
-│   └── winscp-guide.md                 # работа с WinSCP (SFTP)
+├── docs/                                    # Расширенная документация
+│   ├── architecture-bi.md                   # DWH-архитектура BI (схемы, слои, потоки)
+│   ├── bi-analytics-stack-flagship.md       # флагманское описание BI-кейса
+│   ├── bi-devops-main-tech.md               # техничка ВМ devops-main (порты, сервисы)
+│   ├── cloudru-chronology.md                # ⭐ полная хронология проекта + качество данных
+│   ├── k8s-master-tech.md                   # техничка k8s-master
+│   ├── k8s-cluster-setup.md                 # пошаговая установка K8s-кластера
+│   ├── k8s-commands.md                      # шпаргалка команд K8s
+│   ├── retail-data-generation.md            # генератор retail-датасета (справочный)
+│   ├── git-guide.md                         # работа с Git в проекте
+│   └── winscp-guide.md                      # работа с WinSCP (SFTP)
 │
-└── screenshots/                        # 9 подпапок, ~30 скринов
-    ├── 01_infrastructure/              # Docker, диск, Cloud.ru UI
-    ├── 02_postgresql/                  # базы, таблицы, sales
-    ├── 03_clickhouse/                  # схема, данные
-    ├── 04_redis/                       # keys, values
-    ├── 05_minio/                       # buckets
-    ├── 06_grafana/                     # дашборды
-    ├── 07_node_red/                    # flow (+ html-экспорт)
-    ├── 08_airflow/                     # DAG list, run, graph (+ html-экспорт)
-    └── 09_kubernetes/                  # nodes, pods, helm, ssh
+└── screenshots/                             # 9 подпапок, ~40 скринов
+    ├── 01_infrastructure/                   # Docker, диск, Cloud.ru UI, биллинг
+    ├── 02_postgresql/                       # базы, таблицы, sales
+    ├── 03_clickhouse/                       # схема, данные
+    ├── 04_redis/                            # keys, values
+    ├── 05_minio/                            # buckets
+    ├── 06_grafana/                          # дашборды
+    ├── 07_node_red/                         # flow (+ html-экспорт)
+    ├── 08_airflow/                          # DAG list, run, graph (+ html-экспорт)
+    └── 09_kubernetes/                       # nodes, pods, helm, ssh
 ```
 
-### 📚 Описание файлов документации
+### 📚 Описание документации
 
 | Файл | Назначение |
 |---|---|
@@ -163,10 +165,11 @@ cloud-infrastructure-project/
 | `docs/architecture-bi.md` | Глубокое описание DWH-архитектуры BI: слои, таблицы, потоки |
 | `docs/bi-analytics-stack-flagship.md` | Флагманское описание BI-кейса для рекрутера |
 | `docs/bi-devops-main-tech.md` | Технические детали ВМ devops-main: сервисы и порты |
+| `docs/cloudru-chronology.md` | **Полная хронология проекта**: даты, инфраструктура, инциденты, качество данных, cheatsheet |
 | `docs/k8s-master-tech.md` | Технические детали k8s-master (control plane, конфиги) |
 | `docs/k8s-cluster-setup.md` | Пошаговая инструкция установки K8s-кластера |
-| `docs/retail-data-generation.md` | Генерация тестового retail-датасета (50K заказов) |
 | `docs/k8s-commands.md` | Шпаргалка команд `kubectl`, `kubeadm`, диагностика |
+| `docs/retail-data-generation.md` | Генератор retail-датасета (справочный материал, требует адаптации) |
 | `docs/git-guide.md` | Правила работы с Git в этом проекте |
 | `docs/winscp-guide.md` | Настройка и правила работы с WinSCP (SFTP) |
 

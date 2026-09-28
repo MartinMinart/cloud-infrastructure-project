@@ -6,6 +6,8 @@
 **Ресурсы:** 2 vCPU, 8 ГБ RAM, 30 ГБ SSD  
 **SSH-ключ:** ed25519 ✅
 
+> ⚠️ ВМ **демонтирована 28.09.2026**. Документ описывает исторический срез на 21.09.2026.
+
 ---
 
 ## 📋 СТАТУС
@@ -15,57 +17,50 @@ cd ~/analytics-stack
 docker compose ps
 ```
 
-**Результат (14 сервисов):**
+**В `docker-compose.yml` объявлено:** 16 сервисов.  
+**Работало в последнем срезе 21.09:** 9 контейнеров.
 ```
-NAME                   STATUS    PORTS
-airflow                Up         8080
-analytics-clickhouse   Up         8123
-analytics-kafka        Up         9092
-analytics-metabase     Up         3000
-analytics-minio        Up         9001
-analytics-postgres     Healthy    5432
-analytics-qdrant       Up         6333
-analytics-redis        Up         6379
-analytics-superset     Healthy    8088
-grafana                Up         3001
-mongodb                Up         27017
-nifi                   Up         8443
-node-red               Up         1880
-redash                 Up         5000
+NAME                    STATUS    PORTS
+airflow                 Up        8080
+airflow-scheduler       Up        —
+analytics-clickhouse    Up        8123
+analytics-metabase      Up        3000
+analytics-minio         Up        9001
+analytics-postgres      Healthy   5432
+analytics-redis         Up        6379
+grafana                 Up        3001
+node-red                Up        1880
 ```
 
 ---
 
 ## 🛠️ СЕРВИСЫ
 
-### Базы данных
-| Сервис | Порт | Назначение |
-|--------|------|------------|
-| **PostgreSQL** | 5432 | Основное реляционное хранилище |
-| **ClickHouse** | 8123 | Колоночная БД для аналитики |
-| **MongoDB** | 27017 | NoSQL документное хранилище |
-| **Qdrant** | 6333 | Векторная БД для AI/RAG |
+### Рабочие в последнем срезе (9 контейнеров)
 
-### ETL и Оркестрация
-| Сервис | Порт | Назначение |
-|--------|------|------------|
-| **Apache Airflow** | 8080 | Оркестрация ETL-пайплайнов |
-| **Apache NiFi** | 8443 | Потоковая обработка данных |
-| **Apache Kafka** | 9092 | Брокер сообщений |
+| Compose service | `container_name` | Порт | Роль / состояние |
+|---|---|---|---|
+| `postgres` | `analytics-postgres` | 5432 | PostgreSQL, `Healthy` |
+| `clickhouse` | `analytics-clickhouse` | 8123, 9005→9000 | OLAP, `Up` |
+| `redis` | `analytics-redis` | 6379 | Кэш, `Up`; без volume |
+| `metabase` | `analytics-metabase` | 3000 | `Up`; сохранённый дашборд не подтверждён |
+| `minio` | `analytics-minio` | 9001, 9105 | S3-хранилище, `Up` |
+| `airflow` | `airflow` | 8080 | Webserver, `Up` |
+| `airflow-scheduler` | `airflow-scheduler` | — | Scheduler, `Up` |
+| `grafana` | `grafana` | 3001 | Дашборды, `Up` |
+| `node-red` | `node-red` | 1880 | Flow `Inject → Debug`, `Up` |
 
-### BI и Визуализация
-| Сервис | Порт | Назначение |
-|--------|------|------------|
-| **Metabase** | 3000 | BI-дашборды для бизнес-пользователей |
-| **Apache Superset** | 8088 | BI для продвинутой аналитики |
-| **Grafana** | 3001 | Мониторинг и метрики |
-| **Redash** | 5000 | SQL-запросы и визуализация |
+### Остальные объявленные в Compose (7)
 
-### Автоматизация и Хранилище
-| Сервис | Порт | Назначение |
-|--------|------|------------|
-| **Node-RED** | 1880 | Визуальная разработка потоков |
-| **MinIO** | 9001 | S3-совместимое объектное хранилище |
+| Compose service | `container_name` | Порт | Статус в историческом срезе |
+|---|---|---|---|
+| `dbt` | `analytics-dbt` | — | `Exited (0)`; запускается по требованию, не входит в 9 контейнеров `Up` |
+| `superset` | `analytics-superset` | 8088 | Не работал в последнем срезе; не использовался |
+| `redash` | `redash` | 5000 | Остановлен после `Internal Server Error` |
+| `kafka` | `analytics-kafka` | 9092 | Остановлен; pub/sub не проверен |
+| `nifi` | `nifi` | 8443 | Не использовался; отмечена проблема SSL |
+| `mongodb` | `mongodb` | 27017 | Не работал стабильно (`Restarting 139`) |
+| `qdrant` | `analytics-qdrant` | 6333, 6334 | Остановлен; API key не настроен |
 
 ---
 
@@ -185,8 +180,11 @@ cp ~/analytics-stack/.env.example ~/analytics-stack/.env
 |------|---------|
 | 2026-07-12 | Создана первая ВМ devops-main |
 | 2026-08-11 | Пересоздана devops-main-new (213.171.26.123) |
-| 2026-08-11 | Развёрнут Docker стек из 14 сервисов |
+| 2026-08-11 | Развёрнут Docker-стек; техничка фиксирует исторический список из 14 сервисов |
 | 2026-08-11 | Настроен единый ed25519 SSH-ключ |
+| 2026-08-26 | В Compose добавлен dbt; итоговая конфигурация объявляет 16 сервисов |
+| 2026-09-21 | После чистки диска в последнем рабочем срезе запущено 9 контейнеров |
+| 2026-09-28 | ВМ демонтирована; документ сохранён как историческая техничка |
 
 ---
 
@@ -201,4 +199,4 @@ cp ~/analytics-stack/.env.example ~/analytics-stack/.env
 ---
 
 **Автор:** Артур (MartinMinart)  
-**Обновлено:** 2026-08-11
+**Обновлено:** 2026-09-28

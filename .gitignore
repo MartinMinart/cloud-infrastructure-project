@@ -57,3 +57,13 @@ __pycache__/
 **/K8s-master/config
 **/kubeconfig*
 **/*.kubeconfig
+
+# ===== FIX: nested backups =====
+**/backups/*.sql
+!**/backups/*_schema.sql
+!**/backups/*_sample.csv
+
+# ===== FIX: nested backups (полные дампы не коммитим) =====
+**/backups/*.sql
+!**/backups/*_schema.sql
+!**/backups/*_sample.csv

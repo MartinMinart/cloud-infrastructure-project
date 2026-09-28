@@ -1,19 +1,21 @@
 ﻿# 📊 Analytics Stack — Аналитическая платформа сети супермаркетов
 
-**Дата анализа:** 2026-08-30  
+**Дата документирования:** 2026-08-30  
 **Версия:** 1.0  
-**Статус:** ✅ Production-ready
+**Статус:** 📖 Документация; инфраструктура демонтирована 28.09.2026  
+**Исторический срез:** 21.09.2026
 
 ---
 
 ## 🎯 О ПРОЕКТЕ
 
-**Analytics Stack** — это полнофункциональная аналитическая платформа на основе Data Warehouse, разработанная для розничной сети супермаркетов. Система предназначена для сбора, обработки, трансформации и визуализации данных о продажах, товарах, клиентах и филиалах.
+**Analytics Stack** — учебная аналитическая платформа на синтетических данных розничной сети. В историческом окружении проверялись сбор, обработка и визуализация данных о продажах, товарах, клиентах и филиалах. Это не production-система.
 
 ### Ключевые характеристики:
 - **Модель данных:** Retail (супермаркеты: товары, категории, поставщики, филиалы, сотрудники, клиенты, продажи)
-- **Объем данных:** ~10 000 заказов, 5 914 активных клиентов, 30 филиалов, 2 500 товаров
-- **Выручка:** 10,601,006 ₽ | Средний чек: 1,133 ₽
+- **Объём данных:** 10 000 заказов, 5 914 клиентов с завершёнными заказами, 30 филиалов, 2 500 товаров
+- **Выручка:** все статусы — 11 333 254,25 ₽; `completed` — 10 601 006,25 ₽
+- **Средний чек:** `completed` — 1 133,31 ₽
 - **Stack:** Docker + PostgreSQL + ClickHouse + Apache Airflow + dbt + Metabase/Superset/Grafana
 - **Оркестрация:** Apache Airflow (LocalExecutor)
 - **Трансформация:** dbt (Data Build Tool)
@@ -55,7 +57,7 @@
 │  └─ sales_daily (MergeTree Engine)                                   │
 │     ├─ Высокая скорость аналитических запросов                      │
 │     ├─ ORDER BY (sale_date, category_id, branch_id)                 │
-│     └─ ~10,000+ записей                                             │
+│     └─ 30 000 строк (исторический результат трёх запусков)          │
 │                                                                       │
 │             ⬇️ (SQL Connectors / APIs)                              │
 │                                                                       │
@@ -105,7 +107,7 @@
 - `Employees` — 210 сотрудников
 - `Customers` — 10,000 клиентов
 - `Sales` — 10,000 заказов (9,354 завершены)
-- `Sale_Details` — ~10,000 позиций заказов
+- `Sale_Details` — 20 000 позиций заказов по SQL-дампу
 
 **Управление:** [database/schemas/](../bi-analytics-stack/database/schemas/)
 - `01_create_tables.sql` — Создание полной схемы
@@ -249,7 +251,7 @@ PostgreSQL (Raw)
 │  • Фильтрация (status = 'completed')    │
 │  • SQL JOIN между таблицами              │
 │  • Агрегирование по филиалам/категориям │
-│  • Результат: ~10,000 строк              │
+│  • Результат: до 5,000 строк за запуск (LIMIT DAG) │
 └─────────────────────────────────────────┘
       ⬇️
 ┌─────────────────────────────────────────┐
@@ -277,7 +279,7 @@ ClickHouse (Warehouse)
 ### 📝 Файлы ETL:
 
 #### [airflow/dags/etl_to_clickhouse.py](../bi-analytics-stack/airflow/dags/etl_to_clickhouse.py)
-**Статус:** ✅ Production DAG  
+**Статус:** исторически запускался; 3 успешных запуска зафиксированы 26.08.2026. ВМ демонтированы 28.09.2026.  
 **Оркестратор:** Apache Airflow 2.10.0  
 **Тип:** LocalExecutor (однопоточный для dev)
 
@@ -423,7 +425,7 @@ dbt test --select stg_sales  # Тесты для stg_sales
 analytics-stack/
 │
 ├── 🐳 DOCKER & ОРХЕСТРАЦИЯ
-│   ├── docker-compose.yml                    # ⭐ ГЛАВНЫЙ конфиг (17 сервисов)
+│   ├── docker-compose.yml                    # ⭐ ГЛАВНЫЙ конфиг (16 сервисов)
 │   ├── docker-compose.yml.backup
 │   ├── docker-compose.yml.dbt-backup         # Версия только с dbt
 │   ├── docker-compose.yml.metabase-backup
@@ -526,7 +528,7 @@ docker-compose logs -f airflow     # Logs Airflow
 docker-compose logs -f postgres    # Logs PostgreSQL
 ```
 
-**17 сервисов в этом проекте:**
+**16 сервисов объявлено в текущем Compose:**
 1. PostgreSQL — исходная БД
 2. ClickHouse — warehouse
 3. Metabase — BI
@@ -697,6 +699,8 @@ SUPERSET_SECRET_KEY=...
 
 ## 🔧 QUICK START
 
+Инструкция описывает повторное локальное развёртывание. Исходные ВМ демонтированы; запуск требует локального Docker Compose, актуального `.env` и проверки конфигурации.
+
 ### Запуск проекта:
 ```bash
 cd analytics-stack
@@ -709,7 +713,7 @@ docker-compose up -d
 
 # 3. Инициализировать Airflow (первый запуск)
 docker-compose exec airflow airflow db init
-docker-compose exec airflow airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com
+docker-compose exec airflow airflow users create --username admin --password '<SET_SECURE_AIRFLOW_PASSWORD>' --firstname Admin --lastname User --role Admin --email admin@example.com
 
 # 4. Инициализировать dbt
 docker-compose exec analytics-dbt dbt deps
@@ -722,7 +726,7 @@ docker-compose exec airflow airflow dags trigger etl_to_clickhouse
 docker-compose logs -f airflow
 
 # 7. Открыть интерфейсы:
-#    - Airflow: http://localhost:8080 (admin/admin)
+#    - Airflow: http://localhost:8080 (admin / пароль задан при инициализации)
 #    - Metabase: http://localhost:3000
 #    - Superset: http://localhost:8088
 #    - Grafana: http://localhost:3001
@@ -759,11 +763,12 @@ docker-compose logs -f airflow-scheduler
 | **Филиалов** | 30 |
 | **Сотрудников** | 210 |
 | **Клиентов** | 10,000 |
-| **Заказов всего** | 10,000 |
-| **Завершенных заказов** | 9,354 (93.54%) |
-| **Общая выручка** | 10,601,006 ₽ |
-| **Средний чек** | 1,133 ₽ |
-| **Активных клиентов** | 5,914 |
+| **Заказов всего** | 10 000 |
+| **Завершённых заказов (`completed`)** | 9 354 (93,54%) |
+| **Выручка, все статусы** | 11 333 254,25 ₽ |
+| **Выручка, `completed`** | 10 601 006,25 ₽ |
+| **Средний чек, `completed`** | 1 133,31 ₽ |
+| **Клиентов с завершёнными заказами** | 5 914 |
 | **Размер БД PostgreSQL** | ~500 MB |
 | **Размер ClickHouse** | ~200 MB (скомпрессирован) |
 
@@ -795,7 +800,7 @@ docker-compose logs -f airflow-scheduler
    - Re:Dash: для аналитиков (SQL)
 
 5. **Docker Compose**
-   - Локальная разработка === Production
+  - Локальная конфигурация не эквивалентна production-развёртыванию; исходная инфраструктура была учебной и демонтирована.
    - Все сервисы изолированы в контейнерах
    - Легко масштабировать в Kubernetes позже
 
@@ -846,23 +851,27 @@ docker-compose exec analytics-dbt dbt deps
 
 ## ✅ СТАТУС ПРОЕКТА
 
+Последний рабочий снимок относится к 21.09.2026; инфраструктура демонтирована 28.09.2026. В Compose объявлено 16 сервисов. В списке ниже Airflow объединяет webserver и scheduler; в последнем запуске работали 9 контейнеров. dbt завершился `Exited (0)` и запускается по требованию, поэтому не входит в эти 9.
+
 | Компонент | Статус | Комментарий |
 |-----------|--------|-----------|
-| PostgreSQL | ✅ Production | 15-alpine, health checks |
-| ClickHouse | ✅ Production | MergeTree engine |
-| Airflow | ✅ Production | LocalExecutor (готов к масштабированию) |
-| dbt | ✅ Production | Staging готов, Marts к расширению |
-| Metabase | ✅ Production | Connected to PostgreSQL |
-| Superset | ✅ Production | Ready for dashboards |
-| Grafana | ✅ Production | Monitoring dashboards |
-| NiFi | ⚠️ Available | Не используется в ETL |
-| Kafka | ⚠️ Available | Для будущих event streaming |
-| Qdrant | ⚠️ Available | Для embeddings (AI) |
-| MinIO | ⚠️ Available | Для S3-compatible storage |
-| MongoDB | ⚠️ Available | NoSQL опция |
-| Node-RED | ⚠️ Available | Workflow automation |
-| Re:Dash | ✅ Available | SQL analytics |
+| PostgreSQL | ✅ Работал | `postgres:15-alpine`, health checks |
+| ClickHouse | ✅ Работал | MergeTree; 30 000 строк по историческому отчёту |
+| Airflow | ✅ Работал | LocalExecutor; DAG `etl_to_clickhouse` |
+| dbt | ⚠️ Частично | Staging-модель есть, marts пусты; не интегрирован в DAG; завершался `Exited (0)` |
+| Metabase | ⚠️ Поднят | Подключение к PostgreSQL; сохранённый дашборд не подтверждён |
+| Superset | ❌ Не использовался | Эксперимент; не был в последнем рабочем наборе |
+| Grafana | ✅ Работала | Stat-панель: 10 000 заказов; выручка 11 333 254,25 ₽ по всем статусам |
+| NiFi | ❌ Не использовался | Отмечена проблема SSL |
+| Kafka | ❌ Не использовался | pub/sub не проверен |
+| Qdrant | ❌ Не использовался | API key не настроен |
+| MinIO | ⚠️ Поднят | Бакет есть; по историческому отчёту только `test_backup.sql` (60 байт) |
+| MongoDB | ❌ Не работал стабильно | Зафиксирован `Restarting (139)` |
+| Node-RED | ✅ Работал | Flow `Inject → Debug` |
+| Redash | ❌ Не работал | `Internal Server Error` |
+| Redis | ✅ Работал | Ключи проверялись; volume отсутствует, данные не переживают пересоздание |
 
 ---
 
-**Проект готов к production-развертыванию и расширению!** 🚀
+**Проект документирован как учебный кейс Data/Analytics Engineering.**
+Инфраструктура демонтирована 28.09.2026. Код и конфигурация сохранены в репозитории.
