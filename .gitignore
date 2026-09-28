@@ -1,0 +1,59 @@
+﻿# ===== SECRETS =====
+.env
+*.env
+!*.env.example
+kubeconfig*
+*secrets*.yaml
+private-*
+cloud-private/
+ALL_PASSWORDS.txt
+private-env-backup.txt
+*.pem
+id_ed25519
+*.html
+
+# ===== COMPOSE BACKUPS (with real passwords — do not commit) =====
+**/docker-compose.yml.backup
+**/docker-compose.yml.dbt-backup
+**/docker-compose.yml.metabase-backup
+**/docker-compose.yml.original
+
+# ===== BIG DUMPS =====
+*.tar.gz
+*.sql.gz
+**/backups/*.sql
+**/database/backups/*.sql
+!**/backups/*_schema.sql
+!**/backups/*_sample.csv
+!**/database/schemas/*.sql
+
+# ===== BIG MANIFESTS =====
+k8s-monitoring-cluster/manifests/configmaps.yaml
+k8s-monitoring-cluster/manifests/helm-monitoring-manifest.yaml
+k8s-monitoring-cluster/manifests/all-resources.yaml
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+*.bmp
+desktop.ini
+
+# ===== LOGS =====
+*.log
+**/airflow/logs/
+**/dbt/target/
+**/dbt/dbt_packages/
+
+# ===== PYTHON =====
+__pycache__/
+*.pyc
+.venv/
+
+# ===== IDE =====
+.vscode/
+.idea/
+
+# ===== KUBECONFIG (критично!) =====
+**/K8s-master/config
+**/kubeconfig*
+**/*.kubeconfig

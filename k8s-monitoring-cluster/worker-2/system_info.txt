@@ -1,0 +1,18 @@
+ Static hostname: devops-k8s-worker-2
+       Icon name: computer-vm
+         Chassis: vm
+      Machine ID: 3189990c425d4571bf14e8773eeaf6fd
+         Boot ID: b6be14ad98ca48eeb4a45f3d27a62dad
+  Virtualization: kvm
+Operating System: Ubuntu 22.04.5 LTS
+          Kernel: Linux 5.15.0-190-generic
+    Architecture: x86-64
+ Hardware Vendor: OpenStack Foundation
+  Hardware Model: OpenStack Nova
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           794M  3.5M  791M   1% /run
+/dev/vda2        30G   17G   12G  60% /
+tmpfs           3.9G     0  3.9G   0% /dev/shm
+tmpfs           5.0M     0  5.0M   0% /run/lock
+tmpfs           3.9G     0  3.9G   0% /run/qemu
+tmpfs           794M  4.0K  794M   1% /run/user/1000

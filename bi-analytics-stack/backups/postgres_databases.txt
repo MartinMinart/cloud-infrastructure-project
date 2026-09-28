@@ -1,0 +1,17 @@
+                                                      List of databases
+       Name        |   Owner   | Encoding |  Collate   |   Ctype    | ICU Locale | Locale Provider |    Access privileges    
+-------------------+-----------+----------+------------+------------+------------+-----------------+-------------------------
+ airflow_db        | analytics | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | =Tc/analytics          +
+                   |           |          |            |            |            |                 | analytics=CTc/analytics
+ analytics_db      | analytics | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | 
+ analytics_db_new  | analytics | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | 
+ medical_analytics | analytics | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | 
+ metabase_db       | metabase  | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | =Tc/metabase           +
+                   |           |          |            |            |            |                 | metabase=CTc/metabase
+ postgres          | analytics | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | 
+ template0         | analytics | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | =c/analytics           +
+                   |           |          |            |            |            |                 | analytics=CTc/analytics
+ template1         | analytics | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | =c/analytics           +
+                   |           |          |            |            |            |                 | analytics=CTc/analytics
+(8 rows)
+
